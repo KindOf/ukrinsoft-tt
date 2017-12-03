@@ -2,14 +2,28 @@ const fs = require('fs');
 const util = require('util');
 
 const appendFile = util.promisify(fs.appendFile);
+const mkdir = util.promisify(fs.mkdir);
 
-const requestLogger = async function(req, res, next) {
+async function appendRequest(method) {
   try {
-    let e = await appendFile('logs/request-log.csv', `${req.method}, ${new Date()}\r\n`);
+    await appendFile('logs/request-log.csv', `${method}, ${new Date()}\r\n`);
   } catch (error) {
     console.error(error);
   }
-  next();
+}
+
+const requestLogger = function(req, res, next) {
+  fs.stat('logs', async (err, stat) => {
+    if (err && err.code === 'ENOENT') {
+      await mkdir('logs');
+      appendRequest(req.method);
+    } else if (stat.isDirectory()) {
+      appendRequest(req.method);
+    } else {
+      console.error(err);
+    }
+    next();
+  });
 };
 
 module.exports = {
