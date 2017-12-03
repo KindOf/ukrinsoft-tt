@@ -6,7 +6,8 @@ const Request = require('./models/request');
 
 const router = express.Router();
 
-router.get('/', async (req, res, next) => {
+// Save request params to mongoDb
+router.post('/', async (req, res, next) => {
   let response;
   try {
     const query = qs.stringify(req.query);
@@ -22,6 +23,7 @@ router.get('/', async (req, res, next) => {
   });
 });
 
+// Get all requests
 router.get('/requests', async (req, res, next) => {
   let requests;
   try {
